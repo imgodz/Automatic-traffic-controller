@@ -34,7 +34,7 @@ const int buzzer = 7;
 
 const int led = 3;
 
-const int sensorPin = A0;
+int sensorPin = A0;
 
 // Other Variables
 float duration, distance;
@@ -82,10 +82,7 @@ void loop() {
   digitalWrite(Red_W, HIGH);
   delay(20);
 
-  sensorValue = analogRead(sensorPin);
-  Serial.println("Sensor o/p: ");
-  Serial.print(sensorValue);
-  Serial.print("\n");
+  street_Light();
 
   if (sensorValue < 100) {
     digitalWrite(led, HIGH);
@@ -261,4 +258,11 @@ void Lights_West() {
   delay(1000);
   digitalWrite(Red_W, HIGH);
   digitalWrite(Yellow_W, LOW);
+}
+
+void street_Light() {
+  sensorValue = analogRead(sensorPin);
+  Serial.println("Sensor o/p: ");
+  Serial.print(sensorValue);
+  Serial.print("\n");
 }
