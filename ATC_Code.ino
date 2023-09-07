@@ -32,13 +32,18 @@ const int Green_W = 49;
 
 const int buzzer = 7;
 
+const int led = 3;
+
+const int sensorPin = A0;
+
 // Other Variables
 float duration, distance;
 int current;
 int count = 0;
 bool traffic;
 int prev = 4;
-bool north,east,west,south;
+bool north, east, west, south;
+int sensorValue = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -62,24 +67,33 @@ void setup() {
   pinMode(Green_E, OUTPUT);
   pinMode(Green_S, OUTPUT);
   pinMode(Green_W, OUTPUT);
-
+  pinMode(led, OUTPUT);
+  pinMode(buzzer, OUTPUT);
 }
 
 void loop() {
 
   Serial.print("Begin\n");
 
-  do {
-    digitalWrite(Red_N, HIGH);
-    digitalWrite(Red_E, HIGH);
-    digitalWrite(Red_S, HIGH);
-    digitalWrite(Red_W, HIGH);
-    delay(1000);
-    north = Check_Traffic(Trig_North, Echo_North);
-    east = Check_Traffic(Trig_East, Echo_East);
-    west = Check_Traffic(Trig_West, Echo_West);
-    south = Check_Traffic(Trig_South, Echo_South);
-  } while (north && east && west && south);
+
+  digitalWrite(Red_N, HIGH);
+  digitalWrite(Red_E, HIGH);
+  digitalWrite(Red_S, HIGH);
+  digitalWrite(Red_W, HIGH);
+  delay(20);
+
+  sensorValue = analogRead(sensorPin);
+  Serial.println("Sensor o/p: ");
+  Serial.print(sensorValue);
+  Serial.print("\n");
+
+  if (sensorValue < 100) {
+    digitalWrite(led, HIGH);
+    delayMicroseconds(500);
+  }
+  else {
+    digitalWrite(led, LOW);
+  }
 
   current = Select_Road(prev);
   if (current == 1) {
@@ -90,29 +104,25 @@ void loop() {
     }
     prev = 1;
     return;
-  }
-  else if (current == 2) {
+  } else if (current == 2) {
     if (Check_Traffic(Trig_East, Echo_East)) {
       Lights_East();
       count = count + 1;
     }
     prev = 2;
-  }
-  else if (current == 3) {
+  } else if (current == 3) {
     if (Check_Traffic(Trig_South, Echo_South)) {
       Lights_South();
       count = count + 1;
     }
     prev = 3;
-  }
-  else if (current == 4) {
+  } else if (current == 4) {
     if (Check_Traffic(Trig_West, Echo_West)) {
       Lights_West();
       count = count + 1;
     }
     prev = 4;
-  }
-  else {
+  } else {
     return;
   }
   if (count == 4) {
@@ -122,6 +132,7 @@ void loop() {
 }
 
 float Check_Traffic(float Trig, float Echo) {
+  delay(10);
   digitalWrite(Trig, HIGH);
   delayMicroseconds(10);
   digitalWrite(Trig, LOW);
@@ -130,20 +141,19 @@ float Check_Traffic(float Trig, float Echo) {
   Serial.print("Distance\n");
   Serial.print(distance_func);
   Serial.print("\n");
+  delay(10);
   if (distance_func <= 7 && distance_func >= 1) {
     return true;
-  }
-  else {
+  } else {
     return false;
   }
-
 }
 
 void peds_crossing() {
-  for(int i = 0; i <= 10; i++) {
-    tone(buzzer, 5000); // Send 1KHz sound signal...
-    delay(500);        // ...for 1 sec
-    noTone(buzzer);     // Stop sound...
+  for (int i = 0; i <= 10; i++) {
+    tone(buzzer, 5000);  // Send 1KHz sound signal...
+    delay(500);          // ...for 1 sec
+    noTone(buzzer);      // Stop sound...
     delay(500);
   }
 }
@@ -155,14 +165,11 @@ int Select_Road(int prev) {
   Serial.print("Selecting\n");
   if (prev == 4) {
     Current_func = 1;
-  }
-  else if (prev == 1) {
+  } else if (prev == 1) {
     Current_func = 2;
-  }
-  else if (prev == 2) {
+  } else if (prev == 2) {
     Current_func = 3;
-  }
-  else if (prev == 3) {
+  } else if (prev == 3) {
     Current_func = 4;
   }
   return Current_func;
@@ -179,8 +186,7 @@ void Lights_North() {
     delay(2000);
     if (now) {
       continue;
-    }
-    else {
+    } else {
       break;
     }
   }
@@ -202,8 +208,7 @@ void Lights_East() {
     delay(2000);
     if (now) {
       continue;
-    }
-    else {
+    } else {
       break;
     }
   }
@@ -225,8 +230,7 @@ void Lights_South() {
     delay(2000);
     if (now) {
       continue;
-    }
-    else {
+    } else {
       break;
     }
   }
@@ -248,8 +252,7 @@ void Lights_West() {
     delay(2000);
     if (now) {
       continue;
-    }
-    else {
+    } else {
       break;
     }
   }
